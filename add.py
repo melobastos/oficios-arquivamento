@@ -146,10 +146,10 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
     
     if telefone:
-        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=12)
-    else:
-        # Adicionar espaçamento após o último item do endereço se não houver telefone
-        doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=0)
+    
+    # Adicionar espaçamento após o bloco de destinatário
+    adicionar_paragrafo(doc, "", espacamento_depois=12)
     
     # Vocativo
     adicionar_paragrafo(doc, "Ilustríssima Senhora,", espacamento_depois=12)
@@ -215,10 +215,10 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
     adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
     
     if telefone:
-        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=12)
-    else:
-        # Adicionar espaçamento após o último item do endereço se não houver telefone
-        doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
+        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=0)
+    
+    # Adicionar espaçamento após o bloco de destinatário
+    adicionar_paragrafo(doc, "", espacamento_depois=12)
     
     # Vocativo
     adicionar_paragrafo(doc, "Ilustríssimo Senhor,", espacamento_depois=12)
