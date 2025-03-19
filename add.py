@@ -199,59 +199,62 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     
     return temp_file.name
 
-# Função para criar um documento Word (Ofício) para o modelo 3
-def criar_oficio_word(nome, endereco, telefone, processo, assinatura, numero_oficio, conteudo_personalizado):
+# Função para criar ofício de notificação para o acusado (ofício 3)
+def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acusado, endereco, telefone):
     doc = Document()
     doc = formatar_documento(doc)
     
-    # Data atual
-    data_atual = formatar_data_ptbr(datetime.now())
-    
-    # Cabeçalho do documento
-    header = doc.add_paragraph()
-    header.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-    header.add_run(f"Feira de Santana, {data_atual}")
-    doc.add_paragraph("\n")
-    
-    # Referência do ofício
+    # Número do ofício
     ref_paragraph = doc.add_paragraph()
+    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
     ref_run.bold = True
-    doc.add_paragraph("\n")
+
+    # Referência IDEA
+    idea_paragraph = doc.add_paragraph()
+    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    ano_atual = datetime.now().year
+    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
+    idea_run.bold = True
+    idea_run.italic = True
+    
+    # Local e data
+    data_paragraph = doc.add_paragraph()
+    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    data_paragraph.add_run(f"Feira de Santana, {data}")
     
     # Destinatário
-    doc.add_paragraph(f"Ao Sr(a).")
-    doc.add_paragraph(f"{nome}")
+    doc.add_paragraph(f"A Sua Senhoria")
+    doc.add_paragraph(f"{nome_acusado}")
     doc.add_paragraph(f"{endereco}")
+    
     if telefone:
         doc.add_paragraph(f"Tel: {telefone}")
-    doc.add_paragraph("\n")
-    
-    # Assunto
-    assunto_paragraph = doc.add_paragraph()
-    assunto_run = assunto_paragraph.add_run(f"Assunto: Referente ao processo nº {processo}")
-    assunto_run.bold = True
-    doc.add_paragraph("\n")
     
     # Vocativo
-    doc.add_paragraph("Prezado(a) Senhor(a),")
-    doc.add_paragraph("\n")
+    doc.add_paragraph("Ilustríssimo Senhor,")
     
-    # Conteúdo do Ofício (personalizado)
-    doc.add_paragraph(conteudo_personalizado)
-    doc.add_paragraph("\n")
+    # Conteúdo fixo para o ofício 3
+    conteudo = (
+        "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
+        "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
+        "Justiça de Feira de Santana, sirvo-me do presente para Notificá-lo acerca "
+        f"do ARQUIVAMENTO do Inquérito Policial IDEA Nº {numero_idea}/{datetime.now().year}."
+    )
+    doc.add_paragraph(conteudo)
     
-    # Fechamento
+    # Despedida
     doc.add_paragraph("Atenciosamente,")
-    doc.add_paragraph("\n\n")
-    despedida = doc.add_paragraph()
-    despedida.add_run(assinatura).bold = True
+    doc.add_paragraph("\n")
+    doc.add_paragraph("(assinado eletronicamente)")
+    doc.add_paragraph("\n")
     
-    # Rodapé
-    footer = doc.add_paragraph()
-    footer.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    footer_run = footer.add_run("Este é um documento oficial. Favor manter em seus registros.")
-    footer_run.italic = True
+    assinatura_paragraph = doc.add_paragraph()
+    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
+    assinatura_run.bold = True
+    
+    cargo_paragraph = doc.add_paragraph()
+    cargo_paragraph.add_run("Secretaria Processual")
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
@@ -285,7 +288,7 @@ st.write("Preencha os dados abaixo para gerar os ofícios.")
 tab1, tab2, tab3 = st.tabs([
     "Ofício 1 - Comunicação à Delegacia", 
     "Ofício 2 - Notificação à Vítima", 
-    "Ofício 3 - Ofício Personalizado"
+    "Ofício 3 - Notificação ao Acusado"
 ])
 
 with tab1:
@@ -361,7 +364,7 @@ with tab2:
         st.success("Dados do Ofício 2 salvos!")
 
 with tab3:
-    st.subheader("Dados do Ofício 3 - Ofício Personalizado")
+    st.subheader("Dados do Ofício 3 - Notificação ao Acusado")
     
     # Auto-preencher o número sequencial se estiver disponível
     numero_oficio_3_default = ""
@@ -370,22 +373,21 @@ with tab3:
     
     with st.form("dados_oficio_3"):
         numero_oficio_3 = st.text_input("Número do Ofício", numero_oficio_3_default)
-        nome_3 = st.text_input("Nome do Destinatário")
-        endereco_3 = st.text_input("Endereço")
-        telefone_3 = st.text_input("Telefone (opcional)")
-        assinatura = st.text_area("Assinatura (Nome e cargo do responsável)", "Larissa Brandão de Carvalho e Carvalho\nSecretaria Processual")
-        conteudo_3 = st.text_area("Conteúdo do Ofício 3", 
-                                  "Notificamos que o prazo para manifestação no processo referido está se esgotando. Solicitamos sua atenção para o cumprimento dos prazos legais.")
+        nome_acusado = st.text_input("Nome do Acusado")
+        endereco_acusado = st.text_input("Endereço do Acusado")
+        telefone_acusado = st.text_input("Telefone do Acusado (opcional)")
+        
+        # O conteúdo é fixo conforme solicitado
+        st.info("O conteúdo deste ofício é padrão conforme a especificação.")
+        
         submit_3 = st.form_submit_button("Salvar Dados do Ofício 3")
     
     if submit_3:
         st.session_state.dados_oficios["oficio_3"] = {
             "numero_oficio": numero_oficio_3,
-            "nome": nome_3,
-            "endereco": endereco_3,
-            "telefone": telefone_3,
-            "assinatura": assinatura,
-            "conteudo": conteudo_3
+            "nome": nome_acusado,
+            "endereco": endereco_acusado,
+            "telefone": telefone_acusado
         }
         st.success("Dados do Ofício 3 salvos!")
 
@@ -442,14 +444,13 @@ if st.button("Gerar Todos os Ofícios"):
                 st.session_state.dados_oficios["oficio_2"]["endereco"],
                 st.session_state.dados_oficios["oficio_2"].get("telefone", "")
             ),
-            f"Ofício {st.session_state.dados_oficios['oficio_3']['numero_oficio']} - {st.session_state.dados_oficios['oficio_3']['nome']}": criar_oficio_word(
+            f"Ofício {st.session_state.dados_oficios['oficio_3']['numero_oficio']} - Notificação ao Acusado": criar_oficio_notificacao_acusado(
+                st.session_state.dados_oficios["oficio_3"]["numero_oficio"],
+                st.session_state.dados_oficios["oficio_1"]["data_oficio"],  # Usamos a mesma data do ofício 1
+                idea_numero,
                 st.session_state.dados_oficios["oficio_3"]["nome"],
                 st.session_state.dados_oficios["oficio_3"]["endereco"],
-                st.session_state.dados_oficios["oficio_3"].get("telefone", ""),
-                idea_numero,  # Usar o mesmo número IDEA como referência
-                st.session_state.dados_oficios["oficio_3"].get("assinatura", "Larissa Brandão de Carvalho e Carvalho\nSecretaria Processual"),
-                st.session_state.dados_oficios["oficio_3"]["numero_oficio"],
-                st.session_state.dados_oficios["oficio_3"]["conteudo"]
+                st.session_state.dados_oficios["oficio_3"].get("telefone", "")
             )
         }
         
