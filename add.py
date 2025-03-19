@@ -97,6 +97,10 @@ def criar_zip_oficios(arquivos):
     zip_buffer.seek(0)
     return zip_buffer
 
+# Inicializar o estado da sessão para armazenar os dados dos ofícios
+if "dados_oficios" not in st.session_state:
+    st.session_state.dados_oficios = {}
+
 # Interface do Streamlit
 st.set_page_config(page_title="Gerador de Ofícios", layout="wide")
 
@@ -110,9 +114,6 @@ assinatura = st.text_area("Assinatura (Nome e cargo do responsável)")
 # Criar abas para cada ofício
 tab1, tab2, tab3 = st.tabs(["Ofício 1", "Ofício 2", "Ofício 3"])
 
-# Dicionário para armazenar os dados de cada ofício
-dados_oficios = {}
-
 with tab1:
     st.subheader("Dados do Ofício 1")
     with st.form("dados_oficio_1"):
@@ -124,7 +125,7 @@ with tab1:
         submit_1 = st.form_submit_button("Salvar Dados do Ofício 1")
     
     if submit_1:
-        dados_oficios["oficio_1"] = {
+        st.session_state.dados_oficios["oficio_1"] = {
             "nome": nome_1,
             "endereco": endereco_1,
             "telefone": telefone_1,
@@ -143,7 +144,7 @@ with tab2:
         submit_2 = st.form_submit_button("Salvar Dados do Ofício 2")
     
     if submit_2:
-        dados_oficios["oficio_2"] = {
+        st.session_state.dados_oficios["oficio_2"] = {
             "nome": nome_2,
             "endereco": endereco_2,
             "telefone": telefone_2,
@@ -162,7 +163,7 @@ with tab3:
         submit_3 = st.form_submit_button("Salvar Dados do Ofício 3")
     
     if submit_3:
-        dados_oficios["oficio_3"] = {
+        st.session_state.dados_oficios["oficio_3"] = {
             "nome": nome_3,
             "endereco": endereco_3,
             "telefone": telefone_3,
@@ -170,47 +171,67 @@ with tab3:
         }
         st.success("Dados do Ofício 3 salvos!")
 
-# Verificar se temos dados para pelo menos um ofício
-if st.session_state.get("dados_oficios"):
-    dados_oficios = st.session_state.dados_oficios
+# Mostrar o status atual dos dados salvos
+status_col1, status_col2, status_col3 = st.columns(3)
+with status_col1:
+    if "oficio_1" in st.session_state.dados_oficios:
+        st.info(f"Ofício 1: Dados de {st.session_state.dados_oficios['oficio_1']['nome']} salvos ✅")
+    else:
+        st.warning("Ofício 1: Dados não salvos ❌")
+        
+with status_col2:
+    if "oficio_2" in st.session_state.dados_oficios:
+        st.info(f"Ofício 2: Dados de {st.session_state.dados_oficios['oficio_2']['nome']} salvos ✅")
+    else:
+        st.warning("Ofício 2: Dados não salvos ❌")
+        
+with status_col3:
+    if "oficio_3" in st.session_state.dados_oficios:
+        st.info(f"Ofício 3: Dados de {st.session_state.dados_oficios['oficio_3']['nome']} salvos ✅")
+    else:
+        st.warning("Ofício 3: Dados não salvos ❌")
 
 # Botão para gerar todos os ofícios
 if st.button("Gerar Todos os Ofícios"):
     if not processo or not assinatura:
         st.error("Preencha o número do processo e a assinatura antes de gerar os ofícios!")
-    elif len(dados_oficios) < 3:
+    elif len(st.session_state.dados_oficios) < 3 or not all(f"oficio_{i}" in st.session_state.dados_oficios for i in range(1, 4)):
         st.warning("Preencha e salve os dados de todos os três ofícios antes de gerar!")
+        # Mostrar quais ofícios estão faltando
+        for i in range(1, 4):
+            if f"oficio_{i}" not in st.session_state.dados_oficios:
+                st.warning(f"Ofício {i} não tem dados salvos!")
     else:
         st.success("Gerando ofícios...")
         
         # Criar os três documentos
         arquivos = {
             "Ofício 1": criar_oficio_word(
-                dados_oficios["oficio_1"]["nome"],
-                dados_oficios["oficio_1"]["endereco"],
-                dados_oficios["oficio_1"]["telefone"],
+                st.session_state.dados_oficios["oficio_1"]["nome"],
+                st.session_state.dados_oficios["oficio_1"]["endereco"],
+                st.session_state.dados_oficios["oficio_1"]["telefone"],
                 processo,
                 assinatura,
                 "001",
-                dados_oficios["oficio_1"]["conteudo"]
+                st.session_state.dados_oficios["oficio_1"]["conteudo"]
             ),
             "Ofício 2": criar_oficio_word(
-                dados_oficios["oficio_2"]["nome"],
-                dados_oficios["oficio_2"]["endereco"],
-                dados_oficios["oficio_2"]["telefone"],
+                st.session_state.dados_oficios["oficio_2"]["nome"],
+                st.session_state.dados_oficios["oficio_2"]["endereco"],
+                st.session_state.dados_oficios["oficio_2"]["telefone"],
                 processo,
                 assinatura,
                 "002",
-                dados_oficios["oficio_2"]["conteudo"]
+                st.session_state.dados_oficios["oficio_2"]["conteudo"]
             ),
             "Ofício 3": criar_oficio_word(
-                dados_oficios["oficio_3"]["nome"],
-                dados_oficios["oficio_3"]["endereco"],
-                dados_oficios["oficio_3"]["telefone"],
+                st.session_state.dados_oficios["oficio_3"]["nome"],
+                st.session_state.dados_oficios["oficio_3"]["endereco"],
+                st.session_state.dados_oficios["oficio_3"]["telefone"],
                 processo,
                 assinatura,
                 "003",
-                dados_oficios["oficio_3"]["conteudo"]
+                st.session_state.dados_oficios["oficio_3"]["conteudo"]
             )
         }
         
@@ -233,7 +254,7 @@ if st.button("Gerar Todos os Ofícios"):
         with download_col1:
             with open(arquivos["Ofício 1"], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 1 ({dados_oficios['oficio_1']['nome']})",
+                    label=f"Baixar Ofício 1 ({st.session_state.dados_oficios['oficio_1']['nome']})",
                     data=file,
                     file_name="Ofício_1.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -243,7 +264,7 @@ if st.button("Gerar Todos os Ofícios"):
         with download_col2:
             with open(arquivos["Ofício 2"], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 2 ({dados_oficios['oficio_2']['nome']})",
+                    label=f"Baixar Ofício 2 ({st.session_state.dados_oficios['oficio_2']['nome']})",
                     data=file,
                     file_name="Ofício_2.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -253,21 +274,22 @@ if st.button("Gerar Todos os Ofícios"):
         with download_col3:
             with open(arquivos["Ofício 3"], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 3 ({dados_oficios['oficio_3']['nome']})",
+                    label=f"Baixar Ofício 3 ({st.session_state.dados_oficios['oficio_3']['nome']})",
                     data=file,
                     file_name="Ofício_3.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key="download-3"
                 )
         
-        # Remover arquivos temporários
+        # Remover arquivos temporários após um tempo razoável para download
         for caminho in arquivos.values():
-            os.remove(caminho)
+            try:
+                os.remove(caminho)
+            except:
+                pass
 
-# Inicializar o estado da sessão para armazenar os dados dos ofícios
-if "dados_oficios" not in st.session_state:
+# Adicionar um botão para limpar todos os dados
+if st.button("Limpar Todos os Dados"):
     st.session_state.dados_oficios = {}
-
-# Atualizar o estado da sessão com os dados dos ofícios
-if dados_oficios:
-    st.session_state.dados_oficios.update(dados_oficios)
+    st.success("Todos os dados foram limpos!")
+    st.experimental_rerun()
