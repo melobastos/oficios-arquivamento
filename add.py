@@ -26,7 +26,75 @@ def formatar_documento(doc):
     
     return doc
 
-# Função para criar um documento Word (Ofício)
+# Função para criar ofício modelo de comunicação de arquivamento
+def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
+    doc = Document()
+    doc = formatar_documento(doc)
+    
+    # Número do ofício
+    ref_paragraph = doc.add_paragraph()
+    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {numero_oficio}/2024/SP-FSA/25ªPJ")
+    ref_run.bold = True
+    
+    # Referência IDEA
+    idea_paragraph = doc.add_paragraph()
+    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/2024)")
+    idea_run.bold = True
+    idea_run.italic = True
+    
+    # Local e data
+    data_paragraph = doc.add_paragraph()
+    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    data_paragraph.add_run(f"Feira de Santana, {data}")
+    
+    # Destinatário
+    doc.add_paragraph("A Sua Excelência a Senhora")
+    
+    nome_paragraph = doc.add_paragraph()
+    nome_run = nome_paragraph.add_run("MARIA CLÉCIA VASCONCELOS DE MORAIS FIRMINO COSTA")
+    nome_run.bold = True
+    
+    doc.add_paragraph("Delegacia Especializada de Atendimento à Mulher de Feira de Santana -- DEAM")
+    doc.add_paragraph("Avenida Maria Quitéria nº 1870, Centro")
+    doc.add_paragraph("Feira de Santana -- Bahia, CEP: 44001-344")
+    doc.add_paragraph("E-mail: deam.feiradesantana@pcivil.ba.gov.br")
+    
+    # Vocativo
+    doc.add_paragraph("Excelentíssima Senhora,")
+    
+    # Conteúdo
+    conteudo = (
+        "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
+        "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
+        "Justiça, sirvo-me do presente para, atendendo ao quanto disposto no art. "
+        "28 do Código de Processo Penal, comunicar a Vossa Excelência o "
+        f"ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/2024, consoante "
+        "Promoção anexa."
+    )
+    doc.add_paragraph(conteudo)
+    
+    # Despedida
+    doc.add_paragraph("Cordialmente,")
+    doc.add_paragraph("\n")
+    doc.add_paragraph("(assinado eletronicamente)")
+    doc.add_paragraph("\n")
+    
+    assinatura_paragraph = doc.add_paragraph()
+    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
+    assinatura_run.bold = True
+    
+    cargo_paragraph = doc.add_paragraph()
+    cargo_paragraph.add_run("Secretaria Processual")
+    
+    # Criar arquivo temporário
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+    doc.save(temp_file.name)
+    
+    return temp_file.name
+
+# Função para criar um documento Word (Ofício) para os modelos 2 e 3
 def criar_oficio_word(nome, endereco, telefone, processo, assinatura, tipo, conteudo_personalizado):
     doc = Document()
     doc = formatar_documento(doc)
@@ -105,31 +173,31 @@ if "dados_oficios" not in st.session_state:
 st.set_page_config(page_title="Gerador de Ofícios", layout="wide")
 
 st.title("Gerador de Ofícios Automáticos")
-st.write("Preencha os dados abaixo para gerar três ofícios para destinatários diferentes.")
+st.write("Preencha os dados abaixo para gerar três ofícios.")
 
 # Número do processo comum a todos os ofícios
 processo = st.text_input("Número do Processo (comum a todos os ofícios)")
 assinatura = st.text_area("Assinatura (Nome e cargo do responsável)")
 
 # Criar abas para cada ofício
-tab1, tab2, tab3 = st.tabs(["Ofício 1", "Ofício 2", "Ofício 3"])
+tab1, tab2, tab3 = st.tabs(["Ofício 1 - Arquivamento", "Ofício 2", "Ofício 3"])
 
 with tab1:
-    st.subheader("Dados do Ofício 1")
+    st.subheader("Dados do Ofício 1 - Comunicação de Arquivamento")
+    st.info("Este ofício segue o modelo padrão de comunicação de arquivamento. Apenas alguns campos podem ser alterados.")
+    
     with st.form("dados_oficio_1"):
-        nome_1 = st.text_input("Nome do Destinatário 1")
-        endereco_1 = st.text_input("Endereço 1")
-        telefone_1 = st.text_input("Telefone 1")
-        conteudo_1 = st.text_area("Conteúdo do Ofício 1", 
-                                  "Venho por meio deste comunicar sobre o andamento do processo mencionado. Solicito seu comparecimento em nosso escritório para tratar de assuntos relacionados ao mesmo.")
+        numero_oficio = st.text_input("Número do Ofício", "4886")
+        data_oficio = st.date_input("Data do Ofício").strftime("%d de %B de %Y")
+        idea_numero = st.text_input("Número IDEA (número do processo)", "596.9.489799")
+        
         submit_1 = st.form_submit_button("Salvar Dados do Ofício 1")
     
     if submit_1:
         st.session_state.dados_oficios["oficio_1"] = {
-            "nome": nome_1,
-            "endereco": endereco_1,
-            "telefone": telefone_1,
-            "conteudo": conteudo_1
+            "numero_oficio": numero_oficio,
+            "data_oficio": data_oficio,
+            "idea_numero": idea_numero
         }
         st.success("Dados do Ofício 1 salvos!")
 
@@ -175,7 +243,7 @@ with tab3:
 status_col1, status_col2, status_col3 = st.columns(3)
 with status_col1:
     if "oficio_1" in st.session_state.dados_oficios:
-        st.info(f"Ofício 1: Dados de {st.session_state.dados_oficios['oficio_1']['nome']} salvos ✅")
+        st.info(f"Ofício 1: Dados do Ofício nº {st.session_state.dados_oficios['oficio_1']['numero_oficio']} salvos ✅")
     else:
         st.warning("Ofício 1: Dados não salvos ❌")
         
@@ -206,14 +274,10 @@ if st.button("Gerar Todos os Ofícios"):
         
         # Criar os três documentos
         arquivos = {
-            "Ofício 1": criar_oficio_word(
-                st.session_state.dados_oficios["oficio_1"]["nome"],
-                st.session_state.dados_oficios["oficio_1"]["endereco"],
-                st.session_state.dados_oficios["oficio_1"]["telefone"],
-                processo,
-                assinatura,
-                "001",
-                st.session_state.dados_oficios["oficio_1"]["conteudo"]
+            "Ofício 1": criar_oficio_arquivamento(
+                st.session_state.dados_oficios["oficio_1"]["numero_oficio"],
+                st.session_state.dados_oficios["oficio_1"]["data_oficio"],
+                st.session_state.dados_oficios["oficio_1"]["idea_numero"]
             ),
             "Ofício 2": criar_oficio_word(
                 st.session_state.dados_oficios["oficio_2"]["nome"],
@@ -254,9 +318,9 @@ if st.button("Gerar Todos os Ofícios"):
         with download_col1:
             with open(arquivos["Ofício 1"], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 1 ({st.session_state.dados_oficios['oficio_1']['nome']})",
+                    label=f"Baixar Ofício 1 (Nº {st.session_state.dados_oficios['oficio_1']['numero_oficio']})",
                     data=file,
-                    file_name="Ofício_1.docx",
+                    file_name="Ofício_1_Arquivamento.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key="download-1"
                 )
