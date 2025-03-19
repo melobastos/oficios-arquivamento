@@ -111,8 +111,8 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Cordialmente,", espacamento_depois=36)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "Cordialmente,", espacamento_depois=18)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
     adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
     adicionar_paragrafo(doc, "Secretaria Processual")
     
@@ -178,8 +178,8 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     adicionar_paragrafo(doc, conteudo3, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=36)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=18)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
     adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
     adicionar_paragrafo(doc, "Secretaria Processual")
     
@@ -229,8 +229,8 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
     adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=36)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=18)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
     adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
     adicionar_paragrafo(doc, "Secretaria Processual")
     
