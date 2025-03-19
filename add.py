@@ -56,7 +56,8 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     nome_run = nome_paragraph.add_run("MARIA CLÉCIA VASCONCELOS DE MORAIS FIRMINO COSTA")
     nome_run.bold = True
     
-    doc.add_paragraph("Delegacia Especializada de Atendimento à Mulher de Feira de Santana -- DEAM")
+    doc.add_paragraph("Delegacia Especializada de Atendimento à Mulher de Feira de Santana --")
+    doc.add_paragraph("DEAM")
     doc.add_paragraph("Avenida Maria Quitéria nº 1870, Centro")
     doc.add_paragraph("Feira de Santana -- Bahia, CEP: 44001-344")
     doc.add_paragraph("E-mail: deam.feiradesantana@pcivil.ba.gov.br")
@@ -175,9 +176,9 @@ st.set_page_config(page_title="Gerador de Ofícios", layout="wide")
 st.title("Gerador de Ofícios Automáticos")
 st.write("Preencha os dados abaixo para gerar três ofícios.")
 
-# Número do processo comum a todos os ofícios
-processo = st.text_input("Número do Processo (comum a todos os ofícios)")
-assinatura = st.text_area("Assinatura (Nome e cargo do responsável)")
+# Número do processo comum aos ofícios 2 e 3
+processo = st.text_input("Número do Processo (para ofícios 2 e 3)")
+assinatura = st.text_area("Assinatura (Nome e cargo do responsável para ofícios 2 e 3)")
 
 # Criar abas para cada ofício
 tab1, tab2, tab3 = st.tabs(["Ofício 1 - Arquivamento", "Ofício 2", "Ofício 3"])
@@ -243,32 +244,36 @@ with tab3:
 status_col1, status_col2, status_col3 = st.columns(3)
 with status_col1:
     if "oficio_1" in st.session_state.dados_oficios:
-        st.info(f"Ofício 1: Dados do Ofício nº {st.session_state.dados_oficios['oficio_1']['numero_oficio']} salvos ✅")
+        # Corrigido para verificar se a chave existe antes de tentar acessá-la
+        st.info(f"Ofício 1: Dados do Ofício nº {st.session_state.dados_oficios['oficio_1'].get('numero_oficio', '')} salvos ✅")
     else:
         st.warning("Ofício 1: Dados não salvos ❌")
         
 with status_col2:
     if "oficio_2" in st.session_state.dados_oficios:
-        st.info(f"Ofício 2: Dados de {st.session_state.dados_oficios['oficio_2']['nome']} salvos ✅")
+        # Corrigido para verificar se a chave existe antes de tentar acessá-la
+        st.info(f"Ofício 2: Dados de {st.session_state.dados_oficios['oficio_2'].get('nome', '')} salvos ✅")
     else:
         st.warning("Ofício 2: Dados não salvos ❌")
         
 with status_col3:
     if "oficio_3" in st.session_state.dados_oficios:
-        st.info(f"Ofício 3: Dados de {st.session_state.dados_oficios['oficio_3']['nome']} salvos ✅")
+        # Corrigido para verificar se a chave existe antes de tentar acessá-la
+        st.info(f"Ofício 3: Dados de {st.session_state.dados_oficios['oficio_3'].get('nome', '')} salvos ✅")
     else:
         st.warning("Ofício 3: Dados não salvos ❌")
 
 # Botão para gerar todos os ofícios
 if st.button("Gerar Todos os Ofícios"):
-    if not processo or not assinatura:
-        st.error("Preencha o número do processo e a assinatura antes de gerar os ofícios!")
-    elif len(st.session_state.dados_oficios) < 3 or not all(f"oficio_{i}" in st.session_state.dados_oficios for i in range(1, 4)):
+    if not all(f"oficio_{i}" in st.session_state.dados_oficios for i in range(1, 4)):
         st.warning("Preencha e salve os dados de todos os três ofícios antes de gerar!")
         # Mostrar quais ofícios estão faltando
         for i in range(1, 4):
             if f"oficio_{i}" not in st.session_state.dados_oficios:
                 st.warning(f"Ofício {i} não tem dados salvos!")
+    elif not processo or not assinatura:
+        # Verifique o processo e assinatura apenas para os ofícios 2 e 3
+        st.error("Preencha o número do processo e a assinatura antes de gerar os ofícios 2 e 3!")
     else:
         st.success("Gerando ofícios...")
         
