@@ -7,6 +7,35 @@ import os
 import zipfile
 import io
 from datetime import datetime
+import locale
+
+# Configurar localização para português do Brasil
+try:
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+except:
+    try:
+        locale.setlocale(locale.LC_TIME, 'Portuguese_Brazil.1252')
+    except:
+        pass  # Fallback para a localização padrão se pt_BR não estiver disponível
+
+# Função para formatar o número do ofício com o ano atual
+def formatar_numero_oficio(numero):
+    ano_atual = datetime.now().year
+    return f"{numero}/{ano_atual}"
+
+# Função para obter data formatada em português do Brasil
+def formatar_data_ptbr(data):
+    try:
+        # Tentativa de formatar com locale
+        return data.strftime("%d de %B de %Y").lower()
+    except:
+        # Fallback para manual mapping se o locale não funcionar
+        meses = {
+            1: "janeiro", 2: "fevereiro", 3: "março", 4: "abril",
+            5: "maio", 6: "junho", 7: "julho", 8: "agosto",
+            9: "setembro", 10: "outubro", 11: "novembro", 12: "dezembro"
+        }
+        return f"{data.day} de {meses[data.month]} de {data.year}"
 
 # Função para formatar o documento
 def formatar_documento(doc):
@@ -31,16 +60,18 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     doc = Document()
     doc = formatar_documento(doc)
     
-    # Número do ofício
+    # Número do ofício com ano atual
     ref_paragraph = doc.add_paragraph()
     ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {numero_oficio}/2024/SP-FSA/25ªPJ")
+    ano_atual = datetime.now().year
+    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
     ref_run.bold = True
     
     # Referência IDEA
     idea_paragraph = doc.add_paragraph()
     idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/2024)")
+    ano_atual = datetime.now().year
+    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
     idea_run.bold = True
     idea_run.italic = True
     
@@ -71,7 +102,7 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
         "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
         "Justiça, sirvo-me do presente para, atendendo ao quanto disposto no art. "
         "28 do Código de Processo Penal, comunicar a Vossa Excelência o "
-        f"ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/2024, consoante "
+        f"ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, consoante "
         "Promoção anexa."
     )
     doc.add_paragraph(conteudo)
@@ -95,23 +126,96 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     
     return temp_file.name
 
-# Função para criar um documento Word (Ofício) para os modelos 2 e 3
-def criar_oficio_word(nome, endereco, telefone, processo, assinatura, tipo, conteudo_personalizado):
+# Função para criar ofício de notificação para vítima (ofício 2)
+def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitima, endereco, telefone):
+    doc = Document()
+    doc = formatar_documento(doc)
+    
+    # Número do ofício
+    ref_paragraph = doc.add_paragraph()
+    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
+    ref_run.bold = True
+
+    # Referência IDEA
+    idea_paragraph = doc.add_paragraph()
+    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    ano_atual = datetime.now().year
+    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
+    idea_run.bold = True
+    idea_run.italic = True
+    
+    # Local e data
+    data_paragraph = doc.add_paragraph()
+    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    data_paragraph.add_run(f"Feira de Santana, {data}")
+    
+    # Destinatário
+    doc.add_paragraph(f"A Sua Senhoria")
+    doc.add_paragraph(f"{nome_vitima}")
+    doc.add_paragraph(f"{endereco}")
+    
+    if telefone:
+        doc.add_paragraph(f"Tel: {telefone}")
+    
+    # Vocativo
+    doc.add_paragraph("Ilustríssima Senhora,")
+    
+    # Conteúdo fixo para o ofício 2
+    conteudo = (
+        "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
+        "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
+        "Justiça de Feira de Santana, sirvo-me do presente para Notificá-la acerca "
+        f"do ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, "
+        "no qual a Vossa Senhoria figura como vítima, consoante Promoção anexa."
+        "\n\n"
+        "Em não concordando com o arquivamento do expediente criminal em questão, "
+        "poderá, no prazo de 30 (trinta) dias a contar do recebimento do presente, "
+        "encaminhar recurso dirigido à Procuradoria-Geral de Justiça, nos termos "
+        "do art. 28, §1º, do Código de Processo Penal). Para tanto, recomendamos "
+        "que procure orientação jurídica adequada para o exercício desse direito."
+        "\n\n"
+        "Por fim, requer que a resposta, se for o caso, seja enviada, preferencialmente, "
+        "por meio eletrônico para o endereço de e-mail: sp.feiradesantana@mpba.mp.br."
+    )
+    doc.add_paragraph(conteudo)
+    
+    # Despedida
+    doc.add_paragraph("Atenciosamente,")
+    doc.add_paragraph("\n")
+    doc.add_paragraph("(assinado eletronicamente)")
+    doc.add_paragraph("\n")
+    
+    assinatura_paragraph = doc.add_paragraph()
+    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
+    assinatura_run.bold = True
+    
+    cargo_paragraph = doc.add_paragraph()
+    cargo_paragraph.add_run("Secretaria Processual")
+    
+    # Criar arquivo temporário
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
+    doc.save(temp_file.name)
+    
+    return temp_file.name
+
+# Função para criar um documento Word (Ofício) para o modelo 3
+def criar_oficio_word(nome, endereco, telefone, processo, assinatura, numero_oficio, conteudo_personalizado):
     doc = Document()
     doc = formatar_documento(doc)
     
     # Data atual
-    data_atual = datetime.now().strftime("%d/%m/%Y")
+    data_atual = formatar_data_ptbr(datetime.now())
     
     # Cabeçalho do documento
     header = doc.add_paragraph()
     header.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-    header.add_run(f"São Paulo, {data_atual}")
+    header.add_run(f"Feira de Santana, {data_atual}")
     doc.add_paragraph("\n")
     
     # Referência do ofício
     ref_paragraph = doc.add_paragraph()
-    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {tipo}/{datetime.now().year}")
+    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
     ref_run.bold = True
     doc.add_paragraph("\n")
     
@@ -119,7 +223,8 @@ def criar_oficio_word(nome, endereco, telefone, processo, assinatura, tipo, cont
     doc.add_paragraph(f"Ao Sr(a).")
     doc.add_paragraph(f"{nome}")
     doc.add_paragraph(f"{endereco}")
-    doc.add_paragraph(f"Tel: {telefone}")
+    if telefone:
+        doc.add_paragraph(f"Tel: {telefone}")
     doc.add_paragraph("\n")
     
     # Assunto
@@ -132,7 +237,7 @@ def criar_oficio_word(nome, endereco, telefone, processo, assinatura, tipo, cont
     doc.add_paragraph("Prezado(a) Senhor(a),")
     doc.add_paragraph("\n")
     
-    # Conteúdo do Ofício (personalizado por tipo)
+    # Conteúdo do Ofício (personalizado)
     doc.add_paragraph(conteudo_personalizado)
     doc.add_paragraph("\n")
     
@@ -158,10 +263,10 @@ def criar_oficio_word(nome, endereco, telefone, processo, assinatura, tipo, cont
 def criar_zip_oficios(arquivos):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for i, (nome_arquivo, caminho_arquivo) in enumerate(arquivos.items(), 1):
-            # Adicionar cada arquivo ao ZIP
+        for nome_arquivo, caminho_arquivo in arquivos.items():
+            # Adicionar cada arquivo ao ZIP com nome adequado
             with open(caminho_arquivo, "rb") as f:
-                zip_file.writestr(f"Oficio_{i}.docx", f.read())
+                zip_file.writestr(f"{nome_arquivo}.docx", f.read())
     
     zip_buffer.seek(0)
     return zip_buffer
@@ -171,71 +276,115 @@ if "dados_oficios" not in st.session_state:
     st.session_state.dados_oficios = {}
 
 # Interface do Streamlit
-st.set_page_config(page_title="Gerador de Ofícios", layout="wide")
+st.set_page_config(page_title="Gerador de Ofícios - MPBA", layout="wide")
 
-st.title("Gerador de Ofícios Automáticos")
-st.write("Preencha os dados abaixo para gerar três ofícios.")
-
-# Número do processo comum aos ofícios 2 e 3
-processo = st.text_input("Número do Processo (para ofícios 2 e 3)")
-assinatura = st.text_area("Assinatura (Nome e cargo do responsável para ofícios 2 e 3)")
+st.title("Gerador de Ofícios Automáticos - MPBA")
+st.write("Preencha os dados abaixo para gerar os ofícios.")
 
 # Criar abas para cada ofício
-tab1, tab2, tab3 = st.tabs(["Ofício 1 - Arquivamento", "Ofício 2", "Ofício 3"])
+tab1, tab2, tab3 = st.tabs([
+    "Ofício 1 - Comunicação à Delegacia", 
+    "Ofício 2 - Notificação à Vítima", 
+    "Ofício 3 - Ofício Personalizado"
+])
 
 with tab1:
-    st.subheader("Dados do Ofício 1 - Comunicação de Arquivamento")
-    st.info("Este ofício segue o modelo padrão de comunicação de arquivamento. Apenas alguns campos podem ser alterados.")
+    st.subheader("Dados do Ofício 1 - Comunicação de Arquivamento à Delegacia")
     
     with st.form("dados_oficio_1"):
         numero_oficio = st.text_input("Número do Ofício", "4886")
-        data_oficio = st.date_input("Data do Ofício").strftime("%d de %B de %Y")
+        data_oficio = st.date_input("Data do Ofício")
         idea_numero = st.text_input("Número IDEA (número do processo)", "596.9.489799")
         
         submit_1 = st.form_submit_button("Salvar Dados do Ofício 1")
     
     if submit_1:
+        # Calcular os números sequenciais para os outros ofícios
+        try:
+            num_oficio_1 = int(numero_oficio)
+            num_oficio_2 = num_oficio_1 + 1
+            num_oficio_3 = num_oficio_1 + 2
+        except ValueError:
+            num_oficio_1 = numero_oficio
+            num_oficio_2 = numero_oficio
+            num_oficio_3 = numero_oficio
+            st.warning("O número do ofício deve ser um número inteiro para sequência automática.")
+        
+        # Formatar a data em português do Brasil
+        data_formatada = formatar_data_ptbr(data_oficio)
+        
         st.session_state.dados_oficios["oficio_1"] = {
             "numero_oficio": numero_oficio,
-            "data_oficio": data_oficio,
+            "data_oficio": data_formatada,
             "idea_numero": idea_numero
         }
+        
+        # Pré-configurar os números sequenciais para os outros ofícios
+        if "oficio_2" not in st.session_state.dados_oficios:
+            st.session_state.dados_oficios["oficio_2"] = {"numero_oficio": str(num_oficio_2)}
+        else:
+            st.session_state.dados_oficios["oficio_2"]["numero_oficio"] = str(num_oficio_2)
+            
+        if "oficio_3" not in st.session_state.dados_oficios:
+            st.session_state.dados_oficios["oficio_3"] = {"numero_oficio": str(num_oficio_3)}
+        else:
+            st.session_state.dados_oficios["oficio_3"]["numero_oficio"] = str(num_oficio_3)
+            
         st.success("Dados do Ofício 1 salvos!")
 
 with tab2:
-    st.subheader("Dados do Ofício 2")
+    st.subheader("Dados do Ofício 2 - Notificação à Vítima")
+    
+    # Auto-preencher o número sequencial se estiver disponível
+    numero_oficio_2_default = ""
+    if "oficio_2" in st.session_state.dados_oficios and "numero_oficio" in st.session_state.dados_oficios["oficio_2"]:
+        numero_oficio_2_default = st.session_state.dados_oficios["oficio_2"]["numero_oficio"]
+    
     with st.form("dados_oficio_2"):
-        nome_2 = st.text_input("Nome do Destinatário 2")
-        endereco_2 = st.text_input("Endereço 2")
-        telefone_2 = st.text_input("Telefone 2")
-        conteudo_2 = st.text_area("Conteúdo do Ofício 2", 
-                                  "Informamos que o processo em questão requer documentação adicional. Favor providenciar os documentos solicitados em anexo no prazo de 10 dias úteis.")
+        numero_oficio_2 = st.text_input("Número do Ofício", numero_oficio_2_default)
+        nome_vitima = st.text_input("Nome da Vítima")
+        endereco_vitima = st.text_input("Endereço da Vítima")
+        telefone_vitima = st.text_input("Telefone da Vítima (opcional)")
+        
+        # O conteúdo é fixo conforme solicitado
+        st.info("O conteúdo deste ofício é padrão conforme a especificação.")
+        
         submit_2 = st.form_submit_button("Salvar Dados do Ofício 2")
     
     if submit_2:
         st.session_state.dados_oficios["oficio_2"] = {
-            "nome": nome_2,
-            "endereco": endereco_2,
-            "telefone": telefone_2,
-            "conteudo": conteudo_2
+            "numero_oficio": numero_oficio_2,
+            "nome": nome_vitima,
+            "endereco": endereco_vitima,
+            "telefone": telefone_vitima
         }
         st.success("Dados do Ofício 2 salvos!")
 
 with tab3:
-    st.subheader("Dados do Ofício 3")
+    st.subheader("Dados do Ofício 3 - Ofício Personalizado")
+    
+    # Auto-preencher o número sequencial se estiver disponível
+    numero_oficio_3_default = ""
+    if "oficio_3" in st.session_state.dados_oficios and "numero_oficio" in st.session_state.dados_oficios["oficio_3"]:
+        numero_oficio_3_default = st.session_state.dados_oficios["oficio_3"]["numero_oficio"]
+    
     with st.form("dados_oficio_3"):
-        nome_3 = st.text_input("Nome do Destinatário 3")
-        endereco_3 = st.text_input("Endereço 3")
-        telefone_3 = st.text_input("Telefone 3")
+        numero_oficio_3 = st.text_input("Número do Ofício", numero_oficio_3_default)
+        nome_3 = st.text_input("Nome do Destinatário")
+        endereco_3 = st.text_input("Endereço")
+        telefone_3 = st.text_input("Telefone (opcional)")
+        assinatura = st.text_area("Assinatura (Nome e cargo do responsável)", "Larissa Brandão de Carvalho e Carvalho\nSecretaria Processual")
         conteudo_3 = st.text_area("Conteúdo do Ofício 3", 
                                   "Notificamos que o prazo para manifestação no processo referido está se esgotando. Solicitamos sua atenção para o cumprimento dos prazos legais.")
         submit_3 = st.form_submit_button("Salvar Dados do Ofício 3")
     
     if submit_3:
         st.session_state.dados_oficios["oficio_3"] = {
+            "numero_oficio": numero_oficio_3,
             "nome": nome_3,
             "endereco": endereco_3,
             "telefone": telefone_3,
+            "assinatura": assinatura,
             "conteudo": conteudo_3
         }
         st.success("Dados do Ofício 3 salvos!")
@@ -244,22 +393,23 @@ with tab3:
 status_col1, status_col2, status_col3 = st.columns(3)
 with status_col1:
     if "oficio_1" in st.session_state.dados_oficios:
-        # Corrigido para verificar se a chave existe antes de tentar acessá-la
-        st.info(f"Ofício 1: Dados do Ofício nº {st.session_state.dados_oficios['oficio_1'].get('numero_oficio', '')} salvos ✅")
+        st.info(f"Ofício 1: Dados do Ofício nº {formatar_numero_oficio(st.session_state.dados_oficios['oficio_1']['numero_oficio'])} salvos ✅")
     else:
         st.warning("Ofício 1: Dados não salvos ❌")
         
 with status_col2:
     if "oficio_2" in st.session_state.dados_oficios:
-        # Corrigido para verificar se a chave existe antes de tentar acessá-la
-        st.info(f"Ofício 2: Dados de {st.session_state.dados_oficios['oficio_2'].get('nome', '')} salvos ✅")
+        nome_info = st.session_state.dados_oficios["oficio_2"].get("nome", "")
+        numero_info = st.session_state.dados_oficios["oficio_2"].get("numero_oficio", "")
+        st.info(f"Ofício 2: Nº {formatar_numero_oficio(numero_info)} - {nome_info} ✅")
     else:
         st.warning("Ofício 2: Dados não salvos ❌")
         
 with status_col3:
     if "oficio_3" in st.session_state.dados_oficios:
-        # Corrigido para verificar se a chave existe antes de tentar acessá-la
-        st.info(f"Ofício 3: Dados de {st.session_state.dados_oficios['oficio_3'].get('nome', '')} salvos ✅")
+        nome_info = st.session_state.dados_oficios["oficio_3"].get("nome", "")
+        numero_info = st.session_state.dados_oficios["oficio_3"].get("numero_oficio", "")
+        st.info(f"Ofício 3: Nº {formatar_numero_oficio(numero_info)} - {nome_info} ✅")
     else:
         st.warning("Ofício 3: Dados não salvos ❌")
 
@@ -271,35 +421,34 @@ if st.button("Gerar Todos os Ofícios"):
         for i in range(1, 4):
             if f"oficio_{i}" not in st.session_state.dados_oficios:
                 st.warning(f"Ofício {i} não tem dados salvos!")
-    elif not processo or not assinatura:
-        # Verifique o processo e assinatura apenas para os ofícios 2 e 3
-        st.error("Preencha o número do processo e a assinatura antes de gerar os ofícios 2 e 3!")
     else:
         st.success("Gerando ofícios...")
         
+        # Obter o número IDEA do ofício 1 (será usado em todos os ofícios)
+        idea_numero = st.session_state.dados_oficios["oficio_1"]["idea_numero"]
+        
         # Criar os três documentos
         arquivos = {
-            "Ofício 1": criar_oficio_arquivamento(
+            f"Ofício {st.session_state.dados_oficios['oficio_1']['numero_oficio']} - Comunicação à Delegacia": criar_oficio_arquivamento(
                 st.session_state.dados_oficios["oficio_1"]["numero_oficio"],
                 st.session_state.dados_oficios["oficio_1"]["data_oficio"],
-                st.session_state.dados_oficios["oficio_1"]["idea_numero"]
+                idea_numero
             ),
-            "Ofício 2": criar_oficio_word(
+            f"Ofício {st.session_state.dados_oficios['oficio_2']['numero_oficio']} - Notificação à Vítima": criar_oficio_notificacao_vitima(
+                st.session_state.dados_oficios["oficio_2"]["numero_oficio"],
+                st.session_state.dados_oficios["oficio_1"]["data_oficio"],  # Usamos a mesma data do ofício 1
+                idea_numero,
                 st.session_state.dados_oficios["oficio_2"]["nome"],
                 st.session_state.dados_oficios["oficio_2"]["endereco"],
-                st.session_state.dados_oficios["oficio_2"]["telefone"],
-                processo,
-                assinatura,
-                "002",
-                st.session_state.dados_oficios["oficio_2"]["conteudo"]
+                st.session_state.dados_oficios["oficio_2"].get("telefone", "")
             ),
-            "Ofício 3": criar_oficio_word(
+            f"Ofício {st.session_state.dados_oficios['oficio_3']['numero_oficio']} - {st.session_state.dados_oficios['oficio_3']['nome']}": criar_oficio_word(
                 st.session_state.dados_oficios["oficio_3"]["nome"],
                 st.session_state.dados_oficios["oficio_3"]["endereco"],
-                st.session_state.dados_oficios["oficio_3"]["telefone"],
-                processo,
-                assinatura,
-                "003",
+                st.session_state.dados_oficios["oficio_3"].get("telefone", ""),
+                idea_numero,  # Usar o mesmo número IDEA como referência
+                st.session_state.dados_oficios["oficio_3"].get("assinatura", "Larissa Brandão de Carvalho e Carvalho\nSecretaria Processual"),
+                st.session_state.dados_oficios["oficio_3"]["numero_oficio"],
                 st.session_state.dados_oficios["oficio_3"]["conteudo"]
             )
         }
@@ -320,32 +469,34 @@ if st.button("Gerar Todos os Ofícios"):
         st.subheader("Ou baixe individualmente:")
         download_col1, download_col2, download_col3 = st.columns(3)
         
+        keys = list(arquivos.keys())
+        
         with download_col1:
-            with open(arquivos["Ofício 1"], "rb") as file:
+            with open(arquivos[keys[0]], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 1 (Nº {st.session_state.dados_oficios['oficio_1']['numero_oficio']})",
+                    label=f"Baixar {keys[0]}",
                     data=file,
-                    file_name="Ofício_1_Arquivamento.docx",
+                    file_name=f"{keys[0]}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key="download-1"
                 )
         
         with download_col2:
-            with open(arquivos["Ofício 2"], "rb") as file:
+            with open(arquivos[keys[1]], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 2 ({st.session_state.dados_oficios['oficio_2']['nome']})",
+                    label=f"Baixar {keys[1]}",
                     data=file,
-                    file_name="Ofício_2.docx",
+                    file_name=f"{keys[1]}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key="download-2"
                 )
         
         with download_col3:
-            with open(arquivos["Ofício 3"], "rb") as file:
+            with open(arquivos[keys[2]], "rb") as file:
                 st.download_button(
-                    label=f"Baixar Ofício 3 ({st.session_state.dados_oficios['oficio_3']['nome']})",
+                    label=f"Baixar {keys[2]}",
                     data=file,
-                    file_name="Ofício_3.docx",
+                    file_name=f"{keys[2]}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     key="download-3"
                 )
