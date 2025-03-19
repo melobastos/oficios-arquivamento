@@ -76,18 +76,18 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     doc = Document()
     doc = formatar_documento(doc)
     
-    # Número do ofício com ano atual
+    # Número do ofício com ano atual - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
-                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=6)
     
-    # Referência IDEA
+    # Referência IDEA - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
-                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=12)
     
-    # Local e data
-    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
+    # Local e data - ALINHADO À DIREITA
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", alignment=WD_PARAGRAPH_ALIGNMENT.RIGHT, espacamento_depois=12)
     
-    # Destinatário (com espaçamento reduzido entre linhas)
+    # Destinatário (sem espaçamento entre linhas)
     adicionar_paragrafo(doc, "A Sua Excelência a Senhora", espacamento_depois=0)
     adicionar_paragrafo(doc, "MARIA CLÉCIA VASCONCELOS DE MORAIS FIRMINO COSTA", bold=True, espacamento_depois=0)
     adicionar_paragrafo(doc, "Delegacia Especializada de Atendimento à Mulher de Feira de Santana --", espacamento_depois=0)
@@ -99,7 +99,7 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     # Vocativo
     adicionar_paragrafo(doc, "Excelentíssima Senhora,", espacamento_depois=12)
     
-    # Conteúdo
+    # Conteúdo - JUSTIFICADO
     conteudo = (
         "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
         "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
@@ -108,13 +108,15 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
         f"ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, consoante "
         "Promoção anexa."
     )
-    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
+    adicionar_paragrafo(doc, conteudo, alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Cordialmente,", espacamento_depois=18)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
-    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
-    adicionar_paragrafo(doc, "Secretaria Processual")
+    adicionar_paragrafo(doc, "Cordialmente,", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=18)
+    
+    # Assinatura - CENTRALIZADA sem espaçamento
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER)
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
@@ -127,18 +129,18 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     doc = Document()
     doc = formatar_documento(doc)
     
-    # Número do ofício
+    # Número do ofício - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
-                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=6)
 
-    # Referência IDEA
+    # Referência IDEA - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
-                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=12)
     
-    # Local e data
-    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
+    # Local e data - ALINHADO À DIREITA
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", alignment=WD_PARAGRAPH_ALIGNMENT.RIGHT, espacamento_depois=12)
     
-    # Destinatário (com espaçamento reduzido entre linhas)
+    # Destinatário (sem espaçamento entre linhas)
     adicionar_paragrafo(doc, "A Sua Senhoria", espacamento_depois=0)
     adicionar_paragrafo(doc, f"{nome_vitima}", espacamento_depois=0)
     adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
@@ -152,7 +154,7 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     # Vocativo
     adicionar_paragrafo(doc, "Ilustríssima Senhora,", espacamento_depois=12)
     
-    # Conteúdo fixo para o ofício 2
+    # Conteúdo fixo para o ofício 2 - JUSTIFICADO
     conteudo = (
         "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
         "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
@@ -160,7 +162,7 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
         f"do ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, "
         "no qual a Vossa Senhoria figura como vítima, consoante Promoção anexa."
     )
-    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
+    adicionar_paragrafo(doc, conteudo, alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY, espacamento_depois=12)
     
     conteudo2 = (
         "Em não concordando com o arquivamento do expediente criminal em questão, "
@@ -169,19 +171,21 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
         "do art. 28, §1º, do Código de Processo Penal). Para tanto, recomendamos "
         "que procure orientação jurídica adequada para o exercício desse direito."
     )
-    adicionar_paragrafo(doc, conteudo2, espacamento_depois=12)
+    adicionar_paragrafo(doc, conteudo2, alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY, espacamento_depois=12)
     
     conteudo3 = (
         "Por fim, requer que a resposta, se for o caso, seja enviada, preferencialmente, "
         "por meio eletrônico para o endereço de e-mail: sp.feiradesantana@mpba.mp.br."
     )
-    adicionar_paragrafo(doc, conteudo3, espacamento_depois=12)
+    adicionar_paragrafo(doc, conteudo3, alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=18)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
-    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
-    adicionar_paragrafo(doc, "Secretaria Processual")
+    adicionar_paragrafo(doc, "Atenciosamente,", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=18)
+    
+    # Assinatura - CENTRALIZADA sem espaçamento
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER)
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
@@ -194,18 +198,18 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
     doc = Document()
     doc = formatar_documento(doc)
     
-    # Número do ofício
+    # Número do ofício - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
-                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=6)
 
-    # Referência IDEA
+    # Referência IDEA - ALINHADO À ESQUERDA
     adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
-                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_depois=12)
     
-    # Local e data
-    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
+    # Local e data - ALINHADO À DIREITA
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", alignment=WD_PARAGRAPH_ALIGNMENT.RIGHT, espacamento_depois=12)
     
-    # Destinatário (com espaçamento reduzido entre linhas)
+    # Destinatário (sem espaçamento entre linhas)
     adicionar_paragrafo(doc, "A Sua Senhoria", espacamento_depois=0)
     adicionar_paragrafo(doc, f"{nome_acusado}", espacamento_depois=0)
     adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
@@ -219,20 +223,22 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
     # Vocativo
     adicionar_paragrafo(doc, "Ilustríssimo Senhor,", espacamento_depois=12)
     
-    # Conteúdo fixo para o ofício 3
+    # Conteúdo fixo para o ofício 3 - JUSTIFICADO
     conteudo = (
         "Com os nossos cordiais cumprimentos, DE ORDEM DE DRA. NAYARA VALTÉRCIA "
         "GONÇALVES BARRETO, Promotora de Justiça titular da 25ª Promotoria de "
         "Justiça de Feira de Santana, sirvo-me do presente para Notificá-lo acerca "
         f"do ARQUIVAMENTO do Inquérito Policial IDEA Nº {numero_idea}/{datetime.now().year}."
     )
-    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
+    adicionar_paragrafo(doc, conteudo, alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY, espacamento_depois=12)
     
     # Despedida
-    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=18)
-    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=0)
-    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
-    adicionar_paragrafo(doc, "Secretaria Processual")
+    adicionar_paragrafo(doc, "Atenciosamente,", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=18)
+    
+    # Assinatura - CENTRALIZADA sem espaçamento
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual", alignment=WD_PARAGRAPH_ALIGNMENT.CENTER)
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
