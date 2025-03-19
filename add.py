@@ -55,46 +55,49 @@ def formatar_documento(doc):
     
     return doc
 
+# Função para adicionar parágrafo com espaçamento controlado
+def adicionar_paragrafo(doc, texto, bold=False, italic=False, alignment=WD_PARAGRAPH_ALIGNMENT.LEFT, espacamento_antes=0, espacamento_depois=0):
+    paragraph = doc.add_paragraph()
+    paragraph.alignment = alignment
+    run = paragraph.add_run(texto)
+    run.bold = bold
+    run.italic = italic
+    
+    # Ajustar espaçamento se fornecido
+    if espacamento_antes > 0 or espacamento_depois > 0:
+        paragraph_format = paragraph.paragraph_format
+        paragraph_format.space_before = Pt(espacamento_antes)
+        paragraph_format.space_after = Pt(espacamento_depois)
+        
+    return paragraph
+
 # Função para criar ofício modelo de comunicação de arquivamento
 def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
     doc = Document()
     doc = formatar_documento(doc)
     
     # Número do ofício com ano atual
-    ref_paragraph = doc.add_paragraph()
-    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ano_atual = datetime.now().year
-    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
-    ref_run.bold = True
+    adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
     
     # Referência IDEA
-    idea_paragraph = doc.add_paragraph()
-    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ano_atual = datetime.now().year
-    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
-    idea_run.bold = True
-    idea_run.italic = True
+    adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
     
     # Local e data
-    data_paragraph = doc.add_paragraph()
-    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-    data_paragraph.add_run(f"Feira de Santana, {data}")
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
     
-    # Destinatário
-    doc.add_paragraph("A Sua Excelência a Senhora")
-    
-    nome_paragraph = doc.add_paragraph()
-    nome_run = nome_paragraph.add_run("MARIA CLÉCIA VASCONCELOS DE MORAIS FIRMINO COSTA")
-    nome_run.bold = True
-    
-    doc.add_paragraph("Delegacia Especializada de Atendimento à Mulher de Feira de Santana --")
-    doc.add_paragraph("DEAM")
-    doc.add_paragraph("Avenida Maria Quitéria nº 1870, Centro")
-    doc.add_paragraph("Feira de Santana -- Bahia, CEP: 44001-344")
-    doc.add_paragraph("E-mail: deam.feiradesantana@pcivil.ba.gov.br")
+    # Destinatário (com espaçamento reduzido entre linhas)
+    adicionar_paragrafo(doc, "A Sua Excelência a Senhora", espacamento_depois=0)
+    adicionar_paragrafo(doc, "MARIA CLÉCIA VASCONCELOS DE MORAIS FIRMINO COSTA", bold=True, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Delegacia Especializada de Atendimento à Mulher de Feira de Santana --", espacamento_depois=0)
+    adicionar_paragrafo(doc, "DEAM", espacamento_depois=0)
+    adicionar_paragrafo(doc, "Avenida Maria Quitéria nº 1870, Centro", espacamento_depois=0)
+    adicionar_paragrafo(doc, "Feira de Santana -- Bahia, CEP: 44001-344", espacamento_depois=0)
+    adicionar_paragrafo(doc, "E-mail: deam.feiradesantana@pcivil.ba.gov.br", espacamento_depois=12)
     
     # Vocativo
-    doc.add_paragraph("Excelentíssima Senhora,")
+    adicionar_paragrafo(doc, "Excelentíssima Senhora,", espacamento_depois=12)
     
     # Conteúdo
     conteudo = (
@@ -105,20 +108,13 @@ def criar_oficio_arquivamento(numero_oficio, data, numero_idea):
         f"ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, consoante "
         "Promoção anexa."
     )
-    doc.add_paragraph(conteudo)
+    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
     
     # Despedida
-    doc.add_paragraph("Cordialmente,")
-    doc.add_paragraph("\n")
-    doc.add_paragraph("(assinado eletronicamente)")
-    doc.add_paragraph("\n")
-    
-    assinatura_paragraph = doc.add_paragraph()
-    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
-    assinatura_run.bold = True
-    
-    cargo_paragraph = doc.add_paragraph()
-    cargo_paragraph.add_run("Secretaria Processual")
+    adicionar_paragrafo(doc, "Cordialmente,", espacamento_depois=36)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual")
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
@@ -132,34 +128,29 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
     doc = formatar_documento(doc)
     
     # Número do ofício
-    ref_paragraph = doc.add_paragraph()
-    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
-    ref_run.bold = True
+    adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
 
     # Referência IDEA
-    idea_paragraph = doc.add_paragraph()
-    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ano_atual = datetime.now().year
-    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
-    idea_run.bold = True
-    idea_run.italic = True
+    adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
     
     # Local e data
-    data_paragraph = doc.add_paragraph()
-    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-    data_paragraph.add_run(f"Feira de Santana, {data}")
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
     
-    # Destinatário
-    doc.add_paragraph(f"A Sua Senhoria")
-    doc.add_paragraph(f"{nome_vitima}")
-    doc.add_paragraph(f"{endereco}")
+    # Destinatário (com espaçamento reduzido entre linhas)
+    adicionar_paragrafo(doc, "A Sua Senhoria", espacamento_depois=0)
+    adicionar_paragrafo(doc, f"{nome_vitima}", espacamento_depois=0)
+    adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
     
     if telefone:
-        doc.add_paragraph(f"Tel: {telefone}")
+        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=12)
+    else:
+        # Adicionar espaçamento após o último item do endereço se não houver telefone
+        doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
     
     # Vocativo
-    doc.add_paragraph("Ilustríssima Senhora,")
+    adicionar_paragrafo(doc, "Ilustríssima Senhora,", espacamento_depois=12)
     
     # Conteúdo fixo para o ofício 2
     conteudo = (
@@ -168,30 +159,29 @@ def criar_oficio_notificacao_vitima(numero_oficio, data, numero_idea, nome_vitim
         "Justiça de Feira de Santana, sirvo-me do presente para Notificá-la acerca "
         f"do ARQUIVAMENTO do Inquérito Policial IDEA nº {numero_idea}/{datetime.now().year}, "
         "no qual a Vossa Senhoria figura como vítima, consoante Promoção anexa."
-        "\n\n"
+    )
+    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
+    
+    conteudo2 = (
         "Em não concordando com o arquivamento do expediente criminal em questão, "
         "poderá, no prazo de 30 (trinta) dias a contar do recebimento do presente, "
         "encaminhar recurso dirigido à Procuradoria-Geral de Justiça, nos termos "
         "do art. 28, §1º, do Código de Processo Penal). Para tanto, recomendamos "
         "que procure orientação jurídica adequada para o exercício desse direito."
-        "\n\n"
+    )
+    adicionar_paragrafo(doc, conteudo2, espacamento_depois=12)
+    
+    conteudo3 = (
         "Por fim, requer que a resposta, se for o caso, seja enviada, preferencialmente, "
         "por meio eletrônico para o endereço de e-mail: sp.feiradesantana@mpba.mp.br."
     )
-    doc.add_paragraph(conteudo)
+    adicionar_paragrafo(doc, conteudo3, espacamento_depois=12)
     
     # Despedida
-    doc.add_paragraph("Atenciosamente,")
-    doc.add_paragraph("\n")
-    doc.add_paragraph("(assinado eletronicamente)")
-    doc.add_paragraph("\n")
-    
-    assinatura_paragraph = doc.add_paragraph()
-    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
-    assinatura_run.bold = True
-    
-    cargo_paragraph = doc.add_paragraph()
-    cargo_paragraph.add_run("Secretaria Processual")
+    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=36)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual")
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
@@ -205,34 +195,29 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
     doc = formatar_documento(doc)
     
     # Número do ofício
-    ref_paragraph = doc.add_paragraph()
-    ref_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ref_run = ref_paragraph.add_run(f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ")
-    ref_run.bold = True
+    adicionar_paragrafo(doc, f"OFÍCIO Nº {formatar_numero_oficio(numero_oficio)}/SP-FSA/25ªPJ", 
+                    bold=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=6)
 
     # Referência IDEA
-    idea_paragraph = doc.add_paragraph()
-    idea_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-    ano_atual = datetime.now().year
-    idea_run = idea_paragraph.add_run(f"(Ref.: IDEA nº {numero_idea}/{ano_atual})")
-    idea_run.bold = True
-    idea_run.italic = True
+    adicionar_paragrafo(doc, f"(Ref.: IDEA nº {numero_idea}/{datetime.now().year})", 
+                    bold=True, italic=True, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER, espacamento_depois=12)
     
     # Local e data
-    data_paragraph = doc.add_paragraph()
-    data_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-    data_paragraph.add_run(f"Feira de Santana, {data}")
+    adicionar_paragrafo(doc, f"Feira de Santana, {data}", espacamento_depois=12)
     
-    # Destinatário
-    doc.add_paragraph(f"A Sua Senhoria")
-    doc.add_paragraph(f"{nome_acusado}")
-    doc.add_paragraph(f"{endereco}")
+    # Destinatário (com espaçamento reduzido entre linhas)
+    adicionar_paragrafo(doc, "A Sua Senhoria", espacamento_depois=0)
+    adicionar_paragrafo(doc, f"{nome_acusado}", espacamento_depois=0)
+    adicionar_paragrafo(doc, f"{endereco}", espacamento_depois=0)
     
     if telefone:
-        doc.add_paragraph(f"Tel: {telefone}")
+        adicionar_paragrafo(doc, f"Tel: {telefone}", espacamento_depois=12)
+    else:
+        # Adicionar espaçamento após o último item do endereço se não houver telefone
+        doc.paragraphs[-1].paragraph_format.space_after = Pt(12)
     
     # Vocativo
-    doc.add_paragraph("Ilustríssimo Senhor,")
+    adicionar_paragrafo(doc, "Ilustríssimo Senhor,", espacamento_depois=12)
     
     # Conteúdo fixo para o ofício 3
     conteudo = (
@@ -241,20 +226,13 @@ def criar_oficio_notificacao_acusado(numero_oficio, data, numero_idea, nome_acus
         "Justiça de Feira de Santana, sirvo-me do presente para Notificá-lo acerca "
         f"do ARQUIVAMENTO do Inquérito Policial IDEA Nº {numero_idea}/{datetime.now().year}."
     )
-    doc.add_paragraph(conteudo)
+    adicionar_paragrafo(doc, conteudo, espacamento_depois=12)
     
     # Despedida
-    doc.add_paragraph("Atenciosamente,")
-    doc.add_paragraph("\n")
-    doc.add_paragraph("(assinado eletronicamente)")
-    doc.add_paragraph("\n")
-    
-    assinatura_paragraph = doc.add_paragraph()
-    assinatura_run = assinatura_paragraph.add_run("Larissa Brandão de Carvalho e Carvalho")
-    assinatura_run.bold = True
-    
-    cargo_paragraph = doc.add_paragraph()
-    cargo_paragraph.add_run("Secretaria Processual")
+    adicionar_paragrafo(doc, "Atenciosamente,", espacamento_depois=36)
+    adicionar_paragrafo(doc, "(assinado eletronicamente)", espacamento_depois=6)
+    adicionar_paragrafo(doc, "ANDERSON MELO FIUSA BASTOS", bold=True, espacamento_depois=0)
+    adicionar_paragrafo(doc, "Secretaria Processual")
     
     # Criar arquivo temporário
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".docx")
